@@ -37,8 +37,10 @@ const BookingCard = ({
 
         <div className="flex-1">
           <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
-          <p className="mt-0.5 text-[11px] text-gray-500">{clinic}</p>
-          <p className="mt-0.5 text-[11px] text-gray-500">{date}</p>
+          {/* <p className="mt-0.5 text-[11px] text-gray-500">{clinic}</p> */}
+          <p className="mt-0.5 text-[11px] text-gray-500">
+            {date.split("T")[0]}
+          </p>
         </div>
 
         {/* Status badge: text color + transparent background */}

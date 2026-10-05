@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const Booking = require("../model/Booking");
 const Test = require("../model/Test");
 const Clinic = require("../model/Clinic");
+const User = require("../model/User");
 
 const TAB_STATUS = {
   upcoming: ["Pending", "Confirmed", "Scheduled"],
@@ -35,6 +36,7 @@ exports.createBooking = async (req, res) => {
         .json({ message: "Please select a valid future date" });
     }
 
+    // test -> test.clinic gives the clinic id
     const test = await Test.findById(testId);
     if (!test) return res.status(404).json({ message: "Test not found" });
 
@@ -55,13 +57,15 @@ exports.createBooking = async (req, res) => {
     }
 
     const booking = await Booking.create({
-      user: req.user._id,
+      user: req.user._id, // user id from the JWT
+      userName: req.user.fullName,
+      userPhone: req.user.phone,
       test: test._id,
-      clinic: clinic._id,
+      clinic: test.clinic, // clinic id taken from the test
       testName: test.name,
       testType: test.testType,
       clinicName: clinic.name,
-      amount: test.price, 
+      amount: test.price,
       collectionType,
       date: bookingDate,
       timeSlot,
@@ -69,13 +73,20 @@ exports.createBooking = async (req, res) => {
       instructions: instructions || "",
     });
 
-    await Clinic.findByIdAndUpdate(clinic._id, {
-      $addToSet: { bookings: booking._id },
-    });
+    await Promise.all([
+      Clinic.findByIdAndUpdate(clinic._id, {
+        $addToSet: { bookings: booking._id },
+      }),
+      User.findByIdAndUpdate(req.user._id, {
+        $addToSet: { bookings: booking._id },
+      }),
+    ]);
 
-    res
-      .status(201)
-      .json({ message: "Booking created and added to clinic", booking });
+    res.status(201).json({
+      message: "Booking created and added to clinic",
+      userId: req.user._id,
+      booking,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
@@ -84,14 +95,15 @@ exports.createBooking = async (req, res) => {
 
 exports.getMyBookings = async (req, res) => {
   try {
-    const tab = (req.query.tab || "upcoming").toLowerCase();
-    const statuses = TAB_STATUS[tab];
-    if (!statuses) return res.status(400).json({ message: "Invalid tab" });
+    const filter = { user: req.user._id };
 
-    const bookings = await Booking.find({
-      user: req.user._id,
-      status: { $in: statuses },
-    }).sort({ date: tab === "upcoming" ? 1 : -1 });
+    if (req.query.tab) {
+      const statuses = TAB_STATUS[req.query.tab.toLowerCase()];
+      if (!statuses) return res.status(400).json({ message: "Invalid tab" });
+      filter.status = { $in: statuses };
+    }
+
+    const bookings = await Booking.find(filter).sort({ createdAt: -1 }); // newest first
 
     res.json(bookings);
   } catch (error) {

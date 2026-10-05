@@ -11,6 +11,8 @@ const bookingSchema = new mongoose.Schema(
     },
 
     // copied at booking time, so old bookings never change
+    userName: { type: String, default: "" }, // added
+    userPhone: { type: String, default: "" }, // added
     testName: { type: String, required: true },
     testType: { type: String, required: true },
     clinicName: { type: String, required: true },

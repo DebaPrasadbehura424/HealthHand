@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema(
     phone: { type: String, required: true, unique: true, trim: true },
     password: { type: String, required: true, minlength: 6, select: false }, // hidden by default
     photo: { type: String, default: "" },
+    bookings: [{ type: mongoose.Schema.Types.ObjectId, ref: "Booking" }],
   },
   { timestamps: true },
 );

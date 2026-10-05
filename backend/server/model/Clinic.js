@@ -27,6 +27,8 @@ const clinicSchema = new mongoose.Schema(
         price: { type: Number, required: true },
       },
     ],
+
+    bookings: [{ type: mongoose.Schema.Types.ObjectId, ref: "Booking" }],
   },
   { timestamps: true },
 );
