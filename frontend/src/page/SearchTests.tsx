@@ -1,104 +1,70 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiArrowLeft, FiSearch } from "react-icons/fi";
 import { FaTint, FaFlask, FaPoop, FaVial } from "react-icons/fa";
-import { GiButterfly } from "react-icons/gi";
+import type { IconType } from "react-icons";
 
 import SectionHeader from "../component/SectionHeader";
 import FilterBox from "../component/FilterBox";
 import ItemBox from "../component/ItemBox";
+import api from "../api/api";
 
+interface Test {
+  _id: string;
+  name: string;
+  testType: "Blood" | "Urine" | "Stool" | "Other";
+  price: number;
+  parametersCount: number;
+  clinic: {
+    _id: string;
+    name: string;
+    type: "Clinic" | "Hospital";
+    isVerified: boolean;
+  } | null;
+}
 const filters = ["All", "Blood", "Urine", "Stool", "Other"];
 
-const popularSearches = [
-  "Complete Blood Count",
-  "Vitamin D",
-  "Lipid Profile",
-  "Thyroid Profile",
-  "Sugar (FBS)",
-  "Urine Routine",
-];
-
-const tests = [
-  {
-    id: 1,
-    title: "Complete Blood Count (CBC)",
-    category: "Blood",
-    detail: "8 parameters",
-    price: 299,
-    icon: FaTint,
-    color: "#ef4444",
-  },
-  {
-    id: 2,
-    title: "Blood Sugar (FBS & PP)",
-    category: "Blood",
-    detail: "2 tests",
-    price: 199,
-    icon: FaTint,
-    color: "#ef4444",
-  },
-  {
-    id: 3,
-    title: "Lipid Profile",
-    category: "Blood",
-    detail: "5 parameters",
-    price: 499,
-    icon: FaTint,
-    color: "#ef4444",
-  },
-  {
-    id: 4,
-    title: "Liver Function Test (LFT)",
-    category: "Blood",
-    detail: "10 parameters",
-    price: 699,
-    icon: FaVial,
-    color: "#8b5cf6",
-  },
-  {
-    id: 5,
-    title: "Thyroid Profile",
-    category: "Blood",
-    detail: "3 parameters",
-    price: 599,
-    icon: GiButterfly,
-    color: "#3b82f6",
-  },
-  {
-    id: 6,
-    title: "Urine Routine",
-    category: "Urine",
-    detail: "12 parameters",
-    price: 249,
-    icon: FaFlask,
-    color: "#f59e0b",
-  },
-  {
-    id: 7,
-    title: "Stool Routine",
-    category: "Stool",
-    detail: "6 parameters",
-    price: 299,
-    icon: FaPoop,
-    color: "#92400e",
-  },
-];
+// icon + color are decided by testType
+const typeStyle: Record<Test["testType"], { icon: IconType; color: string }> = {
+  Blood: { icon: FaTint, color: "#ef4444" }, // red
+  Urine: { icon: FaFlask, color: "#f59e0b" }, // yellow
+  Stool: { icon: FaPoop, color: "#92400e" }, // brown
+  Other: { icon: FaVial, color: "#8b5cf6" }, // purple
+};
 
 function SearchTests() {
   const navigate = useNavigate();
+
+  const [tests, setTests] = useState<Test[]>([]);
   const [query, setQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // get all tests once
+  useEffect(() => {
+    const fetchTests = async () => {
+      try {
+        const { data } = await api.get("/tests/all");
+        setTests(data);
+      } catch (err: any) {
+        setError(err.response?.data?.message || "Could not load tests");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTests();
+  }, []);
 
   const filteredTests = tests.filter((t) => {
-    const matchFilter = activeFilter === "All" || t.category === activeFilter;
-    const matchQuery = t.title.toLowerCase().includes(query.toLowerCase());
+    const matchFilter = activeFilter === "All" || t.testType === activeFilter;
+    const matchQuery = t.name.toLowerCase().includes(query.toLowerCase());
     return matchFilter && matchQuery;
   });
 
   return (
     <div>
-      {/* Header: back icon + title */}
       <div className="sticky top-0 z-20 flex items-center gap-3 bg-white px-4 py-3">
         <button onClick={() => navigate(-1)} className="text-gray-800">
           <FiArrowLeft size={22} />
@@ -131,38 +97,38 @@ function SearchTests() {
           ))}
         </section>
 
-        {/* Popular Searches */}
-        <section>
-          <SectionHeader title="Popular Searches" />
-          <div className="flex flex-wrap gap-2">
-            {popularSearches.map((s) => (
-              <button
-                key={s}
-                onClick={() => setQuery(s)}
-                className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-[11px] text-gray-600"
-              >
-                {s}
-              </button>
-            ))}
-          </div>
-        </section>
-
         {/* All Tests */}
         <section>
           <SectionHeader title="All Tests" onSeeAll={() => {}} />
           <div className="space-y-3">
-            {filteredTests.map((t) => (
-              <ItemBox
-                key={t.id}
-                icon={t.icon}
-                color={t.color}
-                title={t.title}
-                subtitle={`${t.category} • ${t.detail}`}
-                price={t.price}
-              />
-            ))}
+            {loading && (
+              <p className="py-6 text-center text-xs text-gray-400">
+                Loading tests...
+              </p>
+            )}
 
-            {filteredTests.length === 0 && (
+            {error && (
+              <p className="py-6 text-center text-xs text-red-500">{error}</p>
+            )}
+
+            {!loading &&
+              !error &&
+              filteredTests.map((t) => (
+                <ItemBox
+                  key={t._id}
+                  icon={typeStyle[t.testType].icon}
+                  color={typeStyle[t.testType].color}
+                  title={t.name}
+                  subtitle={`${t.testType} • ${t.parametersCount} parameters`}
+                  price={t.price}
+                  clinicName={t.clinic?.name}
+                  clinicType={t.clinic?.type}
+                  isVerified={t.clinic?.isVerified}
+                  onClick={() => navigate(`/test_details/${t._id}`)}
+                />
+              ))}
+
+            {!loading && !error && filteredTests.length === 0 && (
               <p className="py-6 text-center text-xs text-gray-400">
                 No tests found
               </p>

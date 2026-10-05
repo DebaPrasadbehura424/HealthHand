@@ -33,7 +33,7 @@ function App() {
             <Route path="/db" element={<Dashboard />} />
 
             <Route path="/search_test" element={<SearchTests />} />
-            <Route path="/test_details" element={<TestDetails />} />
+            <Route path="/test_details/:id" element={<TestDetails />} />
             <Route path="/clinic_details" element={<ClinicDetails />} />
             <Route
               path="/booking_apponitment"
