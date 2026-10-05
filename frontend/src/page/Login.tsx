@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
 import { FaHeartbeat } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
+import api from "../api/api";
 
 function Login() {
   const navigate = useNavigate();
@@ -11,8 +12,9 @@ function Login() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!emailOrPhone || !password) {
@@ -20,9 +22,25 @@ function Login() {
       return;
     }
 
-    setError("");
-    console.log({ emailOrPhone, password }); // later: axios POST /api/auth/login
-    navigate("/");
+    try {
+      setLoading(true);
+      setError("");
+
+      const { data } = await api.post("/auth/login", {
+        emailOrPhone,
+        password,
+      });
+
+      // save token + user for the protected APIs
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      navigate("/db");
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -81,9 +99,10 @@ function Login() {
 
         <button
           type="submit"
-          className="h-12 w-full rounded-lg bg-green-700 text-sm font-semibold text-white"
+          disabled={loading}
+          className="h-12 w-full rounded-lg bg-green-700 text-sm font-semibold text-white disabled:opacity-60"
         >
-          Login
+          {loading ? "Logging in..." : "Login"}
         </button>
 
         <div className="text-center">
@@ -114,7 +133,7 @@ function Login() {
         Don't have an account?{" "}
         <button
           type="button"
-          onClick={() => navigate("/register")}
+          onClick={() => navigate("/auth_register")}
           className="font-semibold text-green-700"
         >
           Register

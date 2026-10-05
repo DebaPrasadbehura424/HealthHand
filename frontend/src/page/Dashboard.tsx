@@ -12,6 +12,7 @@ import { GiButterfly } from "react-icons/gi";
 import { MdOutlineVerified } from "react-icons/md";
 import IconBox from "../component/IconBox";
 import SectionHeader from "../component/SectionHeader";
+import { useNavigate } from "react-router-dom";
 
 const popularTests = [
   { label: "Blood Test", icon: FaTint, color: "#ef4444" },
@@ -21,10 +22,25 @@ const popularTests = [
 ];
 
 const quickActions = [
-  { label: "Home", icon: FaHome, color: "#16a34a" },
-  { label: "Book Test", icon: FaCheckCircle, color: "#16a34a" },
-  { label: "My Bookings", icon: FaCalendarCheck, color: "#16a34a" },
-  { label: "Reports", icon: FaFileMedical, color: "#16a34a" },
+  { label: "Home", icon: FaHome, color: "#16a34a", nav: "/db" },
+  {
+    label: "Book Test",
+    icon: FaCheckCircle,
+    color: "#16a34a",
+    nav: "/search_test",
+  },
+  {
+    label: "My Bookings",
+    icon: FaCalendarCheck,
+    color: "#16a34a",
+    nav: "/my_bookings",
+  },
+  {
+    label: "Reports",
+    icon: FaFileMedical,
+    color: "#16a34a",
+    nav: "/my_reports",
+  },
 ];
 
 const clinics = [
@@ -38,6 +54,7 @@ const clinics = [
 ];
 
 function Dashboard() {
+  const navigate = useNavigate();
   return (
     <div className="space-y-6 px-4 py-4">
       {/* Banner */}
@@ -135,7 +152,11 @@ function Dashboard() {
         <SectionHeader title="Quick Actions" />
         <div className="grid grid-cols-4 gap-2">
           {quickActions.map((t) => (
-            <button key={t.label} className="flex flex-col items-center gap-2">
+            <button
+              key={t.label}
+              className="flex flex-col items-center gap-2"
+              onClick={() => navigate(`${t.nav}`)}
+            >
               <IconBox
                 icon={t.icon}
                 color={t.color}

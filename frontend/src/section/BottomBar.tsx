@@ -10,9 +10,9 @@ interface Tab {
 
 const tabs: Tab[] = [
   { label: "Home", path: "/", icon: FiHome },
-  { label: "Bookings", path: "/bookings", icon: FiCalendar },
-  { label: "Reports", path: "/reports", icon: FiFileText },
-  { label: "Profile", path: "/profile", icon: FiUser },
+  { label: "Bookings", path: "/my_bookings", icon: FiCalendar },
+  { label: "Reports", path: "/my_reports", icon: FiFileText },
+  { label: "Profile", path: "/my_profile", icon: FiUser },
 ];
 
 const BottomBar = () => {

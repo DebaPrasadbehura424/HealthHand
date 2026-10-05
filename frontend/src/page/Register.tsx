@@ -10,6 +10,8 @@ import {
   FiEyeOff,
 } from "react-icons/fi";
 
+import api from "../api/api";
+
 function Register() {
   const navigate = useNavigate();
 
@@ -23,16 +25,21 @@ function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!form.fullName || !form.email || !form.phone || !form.password) {
       setError("Please fill all the fields");
+      return;
+    }
+    if (form.password.length < 6) {
+      setError("Password must be at least 6 characters");
       return;
     }
     if (form.password !== form.confirmPassword) {
@@ -40,9 +47,20 @@ function Register() {
       return;
     }
 
-    setError("");
-    console.log(form); // later: axios POST /api/auth/register
-    navigate("/login");
+    try {
+      setLoading(true);
+      setError("");
+
+      const { data } = await api.post("/auth/register", form);
+      alert("Login successfully");
+      localStorage.setItem("token", data.token);
+
+      navigate("/");
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -140,9 +158,10 @@ function Register() {
 
         <button
           type="submit"
-          className="h-12 w-full rounded-lg bg-green-700 text-sm font-semibold text-white"
+          disabled={loading}
+          className="h-12 w-full rounded-lg bg-green-700 text-sm font-semibold text-white disabled:opacity-60"
         >
-          Register
+          {loading ? "Registering..." : "Register"}
         </button>
       </form>
 
@@ -151,7 +170,7 @@ function Register() {
         Already have an account?{" "}
         <button
           type="button"
-          onClick={() => navigate("/login")}
+          onClick={() => navigate("/")}
           className="font-semibold text-green-700"
         >
           Login
