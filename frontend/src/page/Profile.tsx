@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FiArrowLeft,
@@ -8,13 +9,19 @@ import {
   FiInfo,
   FiLogOut,
   FiChevronRight,
+  FiPhone,
 } from "react-icons/fi";
+import api from "../api/api";
 
-const user = {
-  name: "Rahul Sharma",
-  email: "rahul@example.com",
-  photo: "https://i.pravatar.cc/200?img=12", // dummy, replace later
-};
+interface UserData {
+  id: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  photo: string;
+}
+
+const dummyPhoto = "https://i.pravatar.cc/200?img=12";
 
 const menu = [
   { label: "Personal Information", icon: FiUser, path: "/personal-info" },
@@ -26,9 +33,42 @@ const menu = [
 function Profile() {
   const navigate = useNavigate();
 
+  const [user, setUser] = useState<UserData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        navigate("/");
+        return;
+      }
+
+      try {
+        // GET https://healthhand-backend.vercel.app/api/users/me
+        const { data } = await api.get<UserData>("/users/me");
+        setUser(data);
+      } catch (err: any) {
+        if (err.response?.status === 401) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          navigate("/");
+          return;
+        }
+        setError(err.response?.data?.message || "Could not load profile");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, [navigate]);
+
   const handleLogout = () => {
-    // later: clear token from localStorage
-    navigate("/login");
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/");
   };
 
   return (
@@ -46,46 +86,67 @@ function Profile() {
         </button>
       </div>
 
-      <div className="space-y-6 px-4 pb-4">
-        {/* Avatar, name, email */}
-        <section className="flex flex-col items-center pt-2">
-          <img
-            src={user.photo}
-            alt={user.name}
-            className="h-24 w-24 rounded-full border-4 border-green-100 object-cover"
-          />
-          <h2 className="mt-3 text-lg font-bold text-gray-900">{user.name}</h2>
-          <p className="text-xs text-gray-500">{user.email}</p>
-        </section>
+      {loading && (
+        <p className="py-20 text-center text-sm text-gray-400">
+          Loading profile...
+        </p>
+      )}
 
-        {/* Menu list */}
-        <section className="space-y-3">
-          {menu.map((m) => (
+      {!loading && error && (
+        <p className="py-20 text-center text-sm text-red-500">{error}</p>
+      )}
+
+      {!loading && !error && user && (
+        <div className="space-y-6 px-4 pb-4">
+          {/* Avatar, name, email, phone */}
+          <section className="flex flex-col items-center pt-2">
+            <img
+              src={user.photo || dummyPhoto}
+              alt={user.fullName}
+              onError={(e) => {
+                e.currentTarget.src = dummyPhoto;
+              }}
+              className="h-24 w-24 rounded-full border-4 border-green-100 object-cover"
+            />
+            <h2 className="mt-3 text-lg font-bold text-gray-900">
+              {user.fullName}
+            </h2>
+            <p className="text-xs text-gray-500">{user.email}</p>
+            <p className="mt-1 flex items-center gap-1 text-xs text-gray-500">
+              <FiPhone size={12} />
+              {user.phone}
+            </p>
+          </section>
+
+          {/* Menu list */}
+          <section className="space-y-3">
+            {menu.map((m) => (
+              <button
+                key={m.label}
+                onClick={() => navigate(m.path)}
+                className="flex w-full items-center gap-3 rounded-xl border border-gray-100 bg-white px-4 py-3.5 shadow-sm"
+              >
+                <m.icon size={20} className="text-gray-700" />
+                <span className="flex-1 text-left text-sm font-medium text-gray-800">
+                  {m.label}
+                </span>
+                <FiChevronRight size={18} className="text-gray-400" />
+              </button>
+            ))}
+
+            {/* Logout */}
             <button
-              key={m.label}
-              onClick={() => navigate(m.path)}
+              onClick={handleLogout}
               className="flex w-full items-center gap-3 rounded-xl border border-gray-100 bg-white px-4 py-3.5 shadow-sm"
             >
-              <m.icon size={20} className="text-gray-700" />
-              <span className="flex-1 text-left text-sm font-medium text-gray-800">
-                {m.label}
+              <FiLogOut size={20} className="text-red-500" />
+              <span className="flex-1 text-left text-sm font-medium text-red-500">
+                Logout
               </span>
-              <FiChevronRight size={18} className="text-gray-400" />
             </button>
-          ))}
-
-          {/* Logout */}
-          <button
-            onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-xl border border-gray-100 bg-white px-4 py-3.5 shadow-sm"
-          >
-            <FiLogOut size={20} className="text-red-500" />
-            <span className="flex-1 text-left text-sm font-medium text-red-500">
-              Logout
-            </span>
-          </button>
-        </section>
-      </div>
+          </section>
+        </div>
+      )}
     </div>
   );
 }
