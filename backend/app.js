@@ -2,7 +2,10 @@ const express = require("express");
 const cors = require("cors");
 
 const authRoutes = require("./server/routes/authRoutes");
-// ... other routes
+const userRoutes = require("./server/routes/userRoutes");
+const clinicRoutes = require("./server/routes/clinicRoutes");
+const testRoutes = require("./server/routes/testRoutes");
+const bookingRoutes = require("./server/routes/bookingRoutes");
 
 const app = express();
 
@@ -15,7 +18,6 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: function (origin, callback) {
-      // allow requests with no origin (like mobile apps or curl)
       if (!origin) return callback(null, true);
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
