@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://healthhand-backend.vercel.app",
+  baseURL: "https://healthhand-backend.vercel.app/api",
 });
 
 api.interceptors.request.use((config) => {
