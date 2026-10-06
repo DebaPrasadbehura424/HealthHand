@@ -2,13 +2,11 @@ const express = require("express");
 const cors = require("cors");
 
 const authRoutes = require("./server/routes/authRoutes");
-const userRoutes = require("./server/routes/userRoutes");
-const clinicRoutes = require("./server/routes/clinicRoutes");
-const testRoutes = require("./server/routes/testRoutes");
-const bookingRoutes = require("./server/routes/bookingRoutes");
+// ... other routes
 
 const app = express();
-const allowed = [
+
+const allowedOrigins = [
   process.env.FRONTEND_URL,
   "https://health-hand-frontend.vercel.app",
   "http://localhost:5173",
@@ -16,18 +14,28 @@ const allowed = [
 
 app.use(
   cors({
-    origin: allowed,
+    origin: function (origin, callback) {
+      // allow requests with no origin (like mobile apps or curl)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("Not allowed by CORS"));
+    },
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true, // important if you ever send cookies
+    optionsSuccessStatus: 200, // some older browsers choke on 204
   }),
 );
-app.use(express.json());
+
 app.use(express.json());
 
+// Health check
 app.get("/", (req, res) => {
   res.json({
     message: "HealthHand API is running",
-    status: "deployed successfully yo",
+    status: "deployed successfully",
     time: new Date().toISOString(),
   });
 });

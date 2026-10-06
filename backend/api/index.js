@@ -7,13 +7,11 @@ let connected = false;
 
 module.exports = async (req, res) => {
   try {
-    if (req.method === "OPTIONS") return app(req, res);
-
     if (!connected) {
       await connectDB();
       connected = true;
     }
-    return app(req, res);
+    return app(req, res); // let Express (and cors) handle everything, including OPTIONS
   } catch (err) {
     console.error("Function error:", err.message);
     res.statusCode = 500;
