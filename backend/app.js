@@ -8,8 +8,13 @@ const testRoutes = require("./server/routes/testRoutes");
 const bookingRoutes = require("./server/routes/bookingRoutes");
 
 const app = express();
-
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }),
+);
 app.use(express.json());
 
 app.get("/", (req, res) => {

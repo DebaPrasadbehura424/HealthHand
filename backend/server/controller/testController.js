@@ -64,6 +64,25 @@ exports.createTest = async (req, res) => {
   }
 };
 
+exports.getTestById = async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ message: "Invalid test id" });
+    }
+
+    const test = await Test.findById(req.params.id).populate(
+      "clinic",
+      "name type address isVerified lat lng homeCollection",
+    );
+    if (!test) return res.status(404).json({ message: "Test not found" });
+
+    res.json(test);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 exports.getAllTests = async (req, res) => {
   try {
     const tests = await Test.find()

@@ -8,7 +8,7 @@ const {
 
 const router = express.Router();
 
-router.use(protect); // every booking route needs a logged-in user
+router.use(protect);
 
 router.post("/createBook", createBooking);
 router.get("/get_booking", getMyBookings);

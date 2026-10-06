@@ -36,7 +36,7 @@ function App() {
             <Route path="/test_details/:id" element={<TestDetails />} />
             <Route path="/clinic_details" element={<ClinicDetails />} />
             <Route
-              path="/booking_apponitment"
+              path="/booking_apponitment/:testId"
               element={<BookingAppointment />}
             />
             <Route path="/my_bookings" element={<MyBookings />} />

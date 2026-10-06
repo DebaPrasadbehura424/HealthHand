@@ -10,6 +10,6 @@ const router = express.Router();
 
 router.post("/create_test", createTest);
 router.get("/all", getAllTests);
-// router.get("/:id", getTestById); // public: one test
+router.get("/:id", getTestById); // public: one test
 
 module.exports = router;

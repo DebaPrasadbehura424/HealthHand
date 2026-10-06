@@ -234,11 +234,7 @@ function TestDetails() {
               color="#15803d"
               width="100%"
               height={48}
-              onClick={() =>
-                navigate("/booking_apponitment", {
-                  state: { testId: test._id },
-                })
-              }
+              onClick={() => navigate(`/booking_apponitment/${test._id}`)}
             />
           </div>
         </>
