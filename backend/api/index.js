@@ -7,7 +7,6 @@ let connected = false;
 
 module.exports = async (req, res) => {
   try {
-    // preflight request ko DB ki zaroorat nahi
     if (req.method === "OPTIONS") return app(req, res);
 
     if (!connected) {
