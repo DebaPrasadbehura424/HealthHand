@@ -48,7 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true);
       setError("");
-      const { data } = await api.get<UserData>("/users/me", {
+      const { data } = await api.get<UserData>("/auth/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUser(data);
