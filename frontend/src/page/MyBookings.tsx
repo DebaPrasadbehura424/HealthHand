@@ -62,7 +62,7 @@ function MyBookings() {
         }
 
         const res = await fetch(
-          "http://localhost:5000/api/bookings/get_booking",
+          "https://healthhand-backend.vercel.app/api/bookings/get_booking",
           {
             method: "GET",
             headers: {
