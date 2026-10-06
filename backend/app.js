@@ -18,7 +18,11 @@ app.use(
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.json({ message: "HealthHand API is running" });
+  res.json({
+    message: "HealthHand API is running",
+    status: "deployed successfully",
+    time: new Date().toISOString(),
+  });
 });
 
 app.use("/api/auth", authRoutes);
