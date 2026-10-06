@@ -8,9 +8,13 @@ const testRoutes = require("./server/routes/testRoutes");
 const bookingRoutes = require("./server/routes/bookingRoutes");
 
 const app = express();
+const allowed = [process.env.FRONTEND_URL, "http://localhost:5173"].filter(
+  Boolean,
+);
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: allowed,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   }),
