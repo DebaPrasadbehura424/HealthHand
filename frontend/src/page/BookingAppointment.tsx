@@ -115,7 +115,7 @@ function BookingAppointment() {
       setError("");
 
       await axios.post(
-        "http://localhost:5000/api/bookings/createBook",
+        "https://healthhand-backend.vercel.app/api/bookings/createBook",
         {
           testId,
           collectionType,
