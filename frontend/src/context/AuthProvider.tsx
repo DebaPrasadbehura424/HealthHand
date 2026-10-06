@@ -48,12 +48,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true);
       setError("");
-      // token goes in the header (api interceptor), backend finds the user by id from it
-      const { data } = await api.get<UserData>("auth/me");
+      const { data } = await api.get<UserData>("/users/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setUser(data);
     } catch (err: any) {
       if (err.response?.status === 401) {
-        logout(); // token expired or invalid
+        logout();
       } else {
         setError(err.response?.data?.message || "Could not load profile");
       }

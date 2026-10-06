@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FiArrowLeft,
@@ -11,15 +11,7 @@ import {
   FiChevronRight,
   FiPhone,
 } from "react-icons/fi";
-import api from "../api/api";
-
-interface UserData {
-  id: string;
-  fullName: string;
-  email: string;
-  phone: string;
-  photo: string;
-}
+import { useAuth } from "../context/AuthProvider";
 
 const dummyPhoto = "https://i.pravatar.cc/200?img=12";
 
@@ -32,42 +24,19 @@ const menu = [
 
 function Profile() {
   const navigate = useNavigate();
+  const { user, loading, error, fetchUser, logout } = useAuth();
 
-  const [user, setUser] = useState<UserData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
+  // token nahi hai -> Login page, warna Profile khulte hi user load karo
   useEffect(() => {
-    const fetchUser = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        navigate("/");
-        return;
-      }
-
-      try {
-        // GET https://healthhand-backend.vercel.app/api/users/me
-        const { data } = await api.get<UserData>("/users/me");
-        setUser(data);
-      } catch (err: any) {
-        if (err.response?.status === 401) {
-          localStorage.removeItem("token");
-          localStorage.removeItem("user");
-          navigate("/");
-          return;
-        }
-        setError(err.response?.data?.message || "Could not load profile");
-      } finally {
-        setLoading(false);
-      }
-    };
-
+    if (!localStorage.getItem("token")) {
+      navigate("/");
+      return;
+    }
     fetchUser();
-  }, [navigate]);
+  }, [fetchUser, navigate]);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    logout();
     navigate("/");
   };
 
