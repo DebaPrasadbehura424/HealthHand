@@ -27,7 +27,7 @@ app.use(express.json());
 app.get("/", (req, res) => {
   res.json({
     message: "HealthHand API is running",
-    status: "deployed successfully",
+    status: "deployed successfully yo",
     time: new Date().toISOString(),
   });
 });
