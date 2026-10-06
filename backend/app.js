@@ -42,7 +42,6 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
-app.use("/api/users", userRoutes);
 app.use("/api/clinics", clinicRoutes);
 app.use("/api/tests", testRoutes);
 app.use("/api/bookings", bookingRoutes);
