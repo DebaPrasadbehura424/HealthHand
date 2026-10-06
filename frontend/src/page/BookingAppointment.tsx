@@ -75,7 +75,7 @@ function BookingAppointment() {
     const fetchTest = async () => {
       try {
         const { data } = await axios.get(
-          `http://localhost:5000/api/tests/${testId}`,
+          `https://healthhand-backend.vercel.app/tests/${testId}`,
         );
         setTest(data);
         if (data.clinic && !data.clinic.homeCollection) {
