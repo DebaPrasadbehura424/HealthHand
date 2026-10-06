@@ -16,7 +16,7 @@ import {
   FaClinicMedical,
 } from "react-icons/fa";
 import type { IconType } from "react-icons";
-// import api from "../api/api";
+import api from "../api/api";
 
 interface Test {
   _id: string;
@@ -74,9 +74,8 @@ function BookingAppointment() {
   useEffect(() => {
     const fetchTest = async () => {
       try {
-        const { data } = await axios.get(
-          `https://healthhand-backend.vercel.app/tests/${testId}`,
-        );
+        const { data } = await api.get(`/tests/${testId}`);
+
         setTest(data);
         if (data.clinic && !data.clinic.homeCollection) {
           setCollectionType("Visit Lab");
