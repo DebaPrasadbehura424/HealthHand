@@ -9,7 +9,6 @@ const bookingRoutes = require("./server/routes/bookingRoutes");
 const app = express();
 
 const allowedOrigins = [
-  process.env.FRONTEND_URL,
   "https://health-hand-frontend.vercel.app",
   "http://localhost:5173",
 ].filter(Boolean);
@@ -25,14 +24,13 @@ app.use(
     },
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true, // important if you ever send cookies
-    optionsSuccessStatus: 200, // some older browsers choke on 204
+    credentials: true,
+    optionsSuccessStatus: 200,
   }),
 );
 
 app.use(express.json());
 
-// Health check
 app.get("/", (req, res) => {
   res.json({
     message: "HealthHand API is running",
