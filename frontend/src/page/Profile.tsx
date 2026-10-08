@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FiArrowLeft,
@@ -24,16 +23,7 @@ const menu = [
 
 function Profile() {
   const navigate = useNavigate();
-  const { user, loading, error, fetchUser, logout } = useAuth();
-
-  // token nahi hai -> Login page, warna Profile khulte hi user load karo
-  useEffect(() => {
-    if (!localStorage.getItem("token")) {
-      navigate("/");
-      return;
-    }
-    fetchUser();
-  }, [fetchUser, navigate]);
+  const { user, loading, error, logout } = useAuth();
 
   const handleLogout = () => {
     logout();
@@ -42,7 +32,6 @@ function Profile() {
 
   return (
     <div>
-      {/* Header: back + title + settings */}
       <div className="sticky top-0 z-20 flex items-center justify-between bg-white px-4 py-3">
         <div className="flex items-center gap-3">
           <button onClick={() => navigate(-1)} className="text-gray-800">

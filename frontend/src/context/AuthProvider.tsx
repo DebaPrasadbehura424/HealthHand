@@ -16,11 +16,41 @@ export interface UserData {
   photo: string;
 }
 
+export interface ClinicTest {
+  _id: string;
+  name: string;
+  testType: "Blood" | "Urine" | "Stool" | "Other";
+  price: number;
+  parametersCount: number;
+  isPopular: boolean;
+}
+
+export interface ClinicData {
+  _id: string;
+  name: string;
+  type: "Clinic" | "Hospital";
+  image: string;
+  address: string;
+  phone: string;
+  rating: number;
+  reviewsCount: number;
+  isVerified: boolean;
+  openTime: string;
+  closeTime: string;
+  homeCollection: boolean;
+  lat: number;
+  lng: number;
+  tests: ClinicTest[];
+}
+
 interface AuthContextType {
   user: UserData | null;
+  clinics: ClinicData[];
   loading: boolean;
+  clinicsLoading: boolean;
   error: string;
   fetchUser: () => Promise<void>;
+  fetchClinics: () => Promise<void>;
   logout: () => void;
 }
 
@@ -28,13 +58,28 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserData | null>(null);
+  const [clinics, setClinics] = useState<ClinicData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [clinicsLoading, setClinicsLoading] = useState(false);
   const [error, setError] = useState("");
 
   const logout = useCallback(() => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setUser(null);
+    setClinics([]);
+  }, []);
+
+  const fetchClinics = useCallback(async () => {
+    try {
+      setClinicsLoading(true);
+      const { data } = await api.get<ClinicData[]>("/clinics/getall_clinics");
+      setClinics(data);
+    } catch (err) {
+      console.error("Could not load clinics", err);
+    } finally {
+      setClinicsLoading(false);
+    }
   }, []);
 
   const fetchUser = useCallback(async () => {
@@ -52,6 +97,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUser(data);
+
+      // after the user is loaded, get the clinics
+      fetchClinics();
     } catch (err: any) {
       if (err.response?.status === 401) {
         logout();
@@ -61,15 +109,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, [logout]);
+  }, [logout, fetchClinics]);
 
-  // load once when the app opens
   useEffect(() => {
     fetchUser();
   }, [fetchUser]);
 
   return (
-    <AuthContext.Provider value={{ user, loading, error, fetchUser, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        clinics,
+        loading,
+        clinicsLoading,
+        error,
+        fetchUser,
+        fetchClinics,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

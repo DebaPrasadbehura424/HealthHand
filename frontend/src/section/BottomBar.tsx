@@ -9,7 +9,7 @@ interface Tab {
 }
 
 const tabs: Tab[] = [
-  { label: "Home", path: "/", icon: FiHome },
+  { label: "Home", path: "/db", icon: FiHome },
   { label: "Bookings", path: "/my_bookings", icon: FiCalendar },
   { label: "Reports", path: "/my_reports", icon: FiFileText },
   { label: "Profile", path: "/my_profile", icon: FiUser },

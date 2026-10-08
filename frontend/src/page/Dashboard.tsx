@@ -13,6 +13,7 @@ import { MdOutlineVerified } from "react-icons/md";
 import IconBox from "../component/IconBox";
 import SectionHeader from "../component/SectionHeader";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthProvider";
 
 const popularTests = [
   { label: "Blood Test", icon: FaTint, color: "#ef4444" },
@@ -43,15 +44,40 @@ const quickActions = [
   },
 ];
 
-const clinics = [
-  {
-    id: 1,
-    name: "CityCare Diagnostic Centre",
-    distance: "1.2 km",
-    price: 199,
-    image: "https://picsum.photos/seed/clinic1/200/200",
-  },
-];
+const { clinics } = useAuth();
+
+// default user location (Bhubaneswar)
+const userLat = 20.3547;
+const userLng = 85.8196;
+
+// Haversine formula: distance in km
+const getDistance = (
+  lat1: number,
+  lng1: number,
+  lat2: number,
+  lng2: number,
+) => {
+  const R = 6371; // earth radius in km
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
+
+// add distance to each clinic, sort nearest first, keep 3
+const nearestClinics = clinics
+  .map((c) => ({
+    ...c,
+    distance: getDistance(userLat, userLng, c.lat, c.lng),
+  }))
+  .sort((a, b) => a.distance - b.distance)
+  .slice(0, 3);
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -113,37 +139,74 @@ function Dashboard() {
 
       {/* Nearby Clinics */}
       <section>
-        <SectionHeader title="Nearby Clinics & Hospitals" onSeeAll={() => {}} />
+        <SectionHeader
+          title="Nearby Clinics & Hospitals"
+          onSeeAll={() => {
+            navigate("/all_clinic_test");
+          }}
+        />
         <div className="space-y-3">
-          {clinics.map((c) => (
-            <div
-              key={c.id}
-              className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-3 shadow-sm"
-            >
-              <img
-                src={c.image}
-                alt={c.name}
-                className="h-16 w-16 rounded-lg object-cover"
-              />
-              <div className="flex-1">
-                <h3 className="text-sm font-semibold text-gray-900">
-                  {c.name}
-                </h3>
-                <p className="mt-0.5 flex items-center gap-1 text-[11px] text-gray-500">
-                  {c.distance} •
-                  <MdOutlineVerified className="text-green-600" />
-                  <span className="text-green-700">Verified</span>
-                </p>
-                <p className="mt-0.5 text-[11px] text-gray-500">
-                  Starts from{" "}
-                  <span className="font-semibold text-gray-900">
-                    ₹{c.price}
-                  </span>
-                </p>
+          {nearestClinics.map((c) => {
+            const startsFrom = c.tests.length
+              ? Math.min(...c.tests.map((t) => t.price))
+              : null;
+
+            return (
+              <div
+                key={c._id}
+                onClick={() =>
+                  navigate("/clinic_details", { state: { id: c._id } })
+                }
+                className="flex cursor-pointer items-center gap-3 rounded-xl border border-gray-100 bg-white p-3 shadow-sm"
+              >
+                <img
+                  src={c.image}
+                  alt={c.name}
+                  className="h-16 w-16 rounded-lg object-cover"
+                />
+                <div className="flex-1">
+                  <h3 className="text-sm font-semibold text-gray-900">
+                    {c.name}
+                  </h3>
+
+                  <p className="mt-0.5 flex items-center gap-1 text-[11px] text-gray-500">
+                    {c.distance.toFixed(1)} km • {c.type}
+                  </p>
+
+                  <p className="mt-0.5 flex items-center gap-1 text-[11px]">
+                    <MdOutlineVerified
+                      className={
+                        c.isVerified ? "text-green-600" : "text-gray-400"
+                      }
+                    />
+                    <span
+                      className={
+                        c.isVerified ? "text-green-700" : "text-gray-500"
+                      }
+                    >
+                      {c.isVerified ? "Verified" : "Not Verified"}
+                    </span>
+                  </p>
+
+                  {startsFrom !== null && (
+                    <p className="mt-0.5 text-[11px] text-gray-500">
+                      Starts from{" "}
+                      <span className="font-semibold text-gray-900">
+                        ₹{startsFrom}
+                      </span>
+                    </p>
+                  )}
+                </div>
+                <FiChevronRight className="text-gray-400" />
               </div>
-              <FiChevronRight className="text-gray-400" />
-            </div>
-          ))}
+            );
+          })}
+
+          {nearestClinics.length === 0 && (
+            <p className="py-4 text-center text-xs text-gray-400">
+              No clinics found
+            </p>
+          )}
         </div>
       </section>
 

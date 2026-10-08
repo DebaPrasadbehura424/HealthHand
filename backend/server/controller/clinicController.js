@@ -1,4 +1,5 @@
 const Clinic = require("../model/Clinic");
+const mongoose = require("mongoose");
 
 exports.createClinic = async (req, res) => {
   try {
@@ -53,6 +54,43 @@ exports.createClinic = async (req, res) => {
     });
 
     res.status(201).json({ message: "Clinic registered successfully", clinic });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// GET /api/clinics  -> all clinics with their tests, NO bookings
+exports.getAllClinics = async (req, res) => {
+  try {
+    const clinics = await Clinic.find()
+      .select("-bookings")
+      .populate("tests", "name testType price parametersCount isPopular")
+      .sort({ rating: -1 });
+
+    res.json(clinics);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.getClinicById = async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ message: "Invalid clinic id" });
+    }
+
+    const clinic = await Clinic.findById(req.params.id)
+      .populate("tests", "name testType price parametersCount isPopular")
+      .populate({
+        path: "bookings",
+        populate: { path: "user", select: "fullName phone email" },
+      });
+
+    if (!clinic) return res.status(404).json({ message: "Clinic not found" });
+
+    res.json(clinic);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });

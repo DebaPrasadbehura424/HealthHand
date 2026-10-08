@@ -11,6 +11,7 @@ import Reports from "./page/Reports";
 import Profile from "./page/Profile";
 import Login from "./page/Login";
 import Register from "./page/Register";
+import AllClinicsTest from "./page/AllClinicTest";
 
 function App() {
   const { pathname } = useLocation();
@@ -42,6 +43,7 @@ function App() {
             <Route path="/my_bookings" element={<MyBookings />} />
             <Route path="/my_reports" element={<Reports />} />
             <Route path="/my_profile" element={<Profile />} />
+            <Route path="/all_clinic_test" element={<AllClinicsTest />} />
           </Routes>
         </main>
 
