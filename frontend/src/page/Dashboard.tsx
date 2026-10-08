@@ -148,7 +148,7 @@ function Dashboard() {
       <section>
         <SectionHeader
           title="Nearby Clinics & Hospitals"
-          onSeeAll={() => navigate("/all_clinics")}
+          onSeeAll={() => navigate("/all_clinic_test")}
         />
         <div className="space-y-3">
           {nearestClinics.map((c) => {

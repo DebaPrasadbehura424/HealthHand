@@ -160,14 +160,13 @@ function ClinicDetails() {
                 color={t.color}
                 title={t.title}
                 price={t.price}
-                onClick={() => navigate("/test-details")}
+                onClick={() => navigate(`/test-details/${t.id}`)}
               />
             ))}
           </div>
         </section>
       </div>
 
-      {/* Book Appointment: sticks above the bottom bar */}
       <div className="sticky bottom-0 bg-white px-4 py-3">
         <Button
           label="Book Appointment"
