@@ -17,16 +17,7 @@ const clinicSchema = new mongoose.Schema(
     lat: { type: Number, required: true, min: -90, max: 90 },
     lng: { type: Number, required: true, min: -180, max: 180 },
 
-    tests: [
-      {
-        test: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Test",
-          required: true,
-        },
-        price: { type: Number, required: true },
-      },
-    ],
+    tests: [{ type: mongoose.Schema.Types.ObjectId, ref: "Test" }],
 
     bookings: [{ type: mongoose.Schema.Types.ObjectId, ref: "Booking" }],
   },
