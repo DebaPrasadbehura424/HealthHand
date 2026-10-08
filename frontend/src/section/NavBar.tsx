@@ -1,19 +1,18 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { FiBell } from "react-icons/fi";
 import { useAuth } from "../context/AuthProvider";
-import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+
+const dummyPhoto = "https://i.pravatar.cc/100?img=12";
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const { user, fetchUser } = useAuth();
+  const { user } = useAuth();
 
+  // token nahi hai to Login page
   useEffect(() => {
-    if (!localStorage.getItem("token")) {
-      navigate("/");
-      return;
-    }
-    fetchUser();
-  }, [fetchUser, navigate]);
+    if (!localStorage.getItem("token")) navigate("/");
+  }, [navigate]);
 
   const hasNotification = true;
 
@@ -23,7 +22,8 @@ const Navbar = () => {
         {/* Left: greeting + description */}
         <div>
           <h1 className="text-lg font-bold text-gray-900">
-            Hello, {user?.fullName} <span className="inline-block">👋</span>
+            Hello, {user?.fullName?.split(" ")[0] || ""}{" "}
+            <span className="inline-block">👋</span>
           </h1>
           <p className="text-xs text-gray-500">
             Find the right test, at the right place.
@@ -40,8 +40,11 @@ const Navbar = () => {
           </button>
 
           <img
-            src={user?.photo}
+            src={user?.photo || dummyPhoto}
             alt="profile"
+            onError={(e) => {
+              e.currentTarget.src = dummyPhoto;
+            }}
             className="h-10 w-10 rounded-full border border-gray-200 object-cover"
           />
         </div>

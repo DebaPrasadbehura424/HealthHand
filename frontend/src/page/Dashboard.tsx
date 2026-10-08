@@ -10,9 +10,9 @@ import {
 } from "react-icons/fa";
 import { GiButterfly } from "react-icons/gi";
 import { MdOutlineVerified } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
 import IconBox from "../component/IconBox";
 import SectionHeader from "../component/SectionHeader";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthProvider";
 
 const popularTests = [
@@ -44,20 +44,18 @@ const quickActions = [
   },
 ];
 
-const { clinics } = useAuth();
-
 // default user location (Bhubaneswar)
 const userLat = 20.3547;
 const userLng = 85.8196;
 
-// Haversine formula: distance in km
+// Haversine formula: distance in km (hook nahi hai, bahar rakh sakte hain)
 const getDistance = (
   lat1: number,
   lng1: number,
   lat2: number,
   lng2: number,
 ) => {
-  const R = 6371; // earth radius in km
+  const R = 6371;
   const toRad = (deg: number) => (deg * Math.PI) / 180;
 
   const dLat = toRad(lat2 - lat1);
@@ -70,17 +68,19 @@ const getDistance = (
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };
 
-// add distance to each clinic, sort nearest first, keep 3
-const nearestClinics = clinics
-  .map((c) => ({
-    ...c,
-    distance: getDistance(userLat, userLng, c.lat, c.lng),
-  }))
-  .sort((a, b) => a.distance - b.distance)
-  .slice(0, 3);
-
 function Dashboard() {
   const navigate = useNavigate();
+  const { clinics } = useAuth(); // hook component ke andar
+
+  // distance add karo, nearest pehle, 3 rakho
+  const nearestClinics = clinics
+    .map((c) => ({
+      ...c,
+      distance: getDistance(userLat, userLng, c.lat, c.lng),
+    }))
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, 3);
+
   return (
     <div className="space-y-6 px-4 py-4">
       {/* Banner */}
@@ -117,10 +117,17 @@ function Dashboard() {
 
       {/* Popular Tests */}
       <section>
-        <SectionHeader title="Popular Tests" onSeeAll={() => {}} />
+        <SectionHeader
+          title="Popular Tests"
+          onSeeAll={() => navigate("/search_test")}
+        />
         <div className="grid grid-cols-4 gap-2">
           {popularTests.map((t) => (
-            <button key={t.label} className="flex flex-col items-center gap-2">
+            <button
+              key={t.label}
+              onClick={() => navigate("/search_test")}
+              className="flex flex-col items-center gap-2"
+            >
               <IconBox
                 icon={t.icon}
                 color={t.color}
@@ -141,9 +148,7 @@ function Dashboard() {
       <section>
         <SectionHeader
           title="Nearby Clinics & Hospitals"
-          onSeeAll={() => {
-            navigate("/all_clinic_test");
-          }}
+          onSeeAll={() => navigate("/all_clinics")}
         />
         <div className="space-y-3">
           {nearestClinics.map((c) => {
@@ -169,7 +174,7 @@ function Dashboard() {
                     {c.name}
                   </h3>
 
-                  <p className="mt-0.5 flex items-center gap-1 text-[11px] text-gray-500">
+                  <p className="mt-0.5 text-[11px] text-gray-500">
                     {c.distance.toFixed(1)} km • {c.type}
                   </p>
 
@@ -218,7 +223,7 @@ function Dashboard() {
             <button
               key={t.label}
               className="flex flex-col items-center gap-2"
-              onClick={() => navigate(`${t.nav}`)}
+              onClick={() => navigate(t.nav)}
             >
               <IconBox
                 icon={t.icon}
