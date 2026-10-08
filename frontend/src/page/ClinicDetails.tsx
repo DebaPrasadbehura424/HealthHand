@@ -166,7 +166,7 @@ function ClinicDetails() {
           </div>
         </section>
       </div>
-
+      {/*  */}
       <div className="sticky bottom-0 bg-white px-4 py-3">
         <Button
           label="Book Appointment"
