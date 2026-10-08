@@ -1,5 +1,6 @@
 const Clinic = require("../model/Clinic");
 const mongoose = require("mongoose");
+const Test = require("../model/Test");
 
 exports.createClinic = async (req, res) => {
   try {
@@ -64,11 +65,20 @@ exports.createClinic = async (req, res) => {
 exports.getAllClinics = async (req, res) => {
   try {
     const clinics = await Clinic.find()
-      .select("-bookings")
-      .populate("tests", "name testType price parametersCount isPopular")
-      .sort({ rating: -1 });
+      .select("-bookings -tests")
+      .sort({ rating: -1 })
+      .lean();
 
-    res.json(clinics);
+    const tests = await Test.find()
+      .select("name testType price parametersCount isPopular clinic")
+      .lean();
+
+    const result = clinics.map((c) => ({
+      ...c,
+      tests: tests.filter((t) => t.clinic.toString() === c._id.toString()),
+    }));
+
+    res.json(result);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
