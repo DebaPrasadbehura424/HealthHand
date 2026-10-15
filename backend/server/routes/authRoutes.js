@@ -12,6 +12,6 @@ const router = express.Router();
 router.post("/register", register);
 router.post("/login", login);
 router.get("/me", protect, getMe);
-router.get("/update_password", protect, updatePassword);
+router.patch("/update_password", protect, updatePassword);
 
 module.exports = router;

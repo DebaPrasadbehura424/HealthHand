@@ -38,7 +38,7 @@ function Profile() {
   const [saving, setSaving] = useState(false);
 
   const handleLogout = () => {
-    localStorage.clear(); // local storage poora khali
+    localStorage.clear();
     logout();
     navigate("/");
   };
@@ -62,8 +62,7 @@ function Profile() {
 
     try {
       setSaving(true);
-      // backend: PUT /api/users/change-password
-      await api.put("/users/change-password", { newPassword });
+      await api.patch("/auth/update_password", { password: newPassword });
       setPwMsg("Password changed successfully");
       setNewPassword("");
       setConfirmPassword("");
